@@ -1133,13 +1133,9 @@ Recomendación: **(c) para Fase 1-3** (peso bajo en la tabla de archetypes ya), 
 
 → Bloqueante para **Fase 3**.
 
-### Open Q10 — Watchlist a 30 proyectos
+### Open Q10 — Watchlist a 30 proyectos ✅ RESUELTA (2026-05-10)
 
-**Contexto**: `watchlist.example.yaml` tiene 26 proyectos. Faltan ~4 para llegar a 30.
-
-**Pregunta**: ¿qué 4 proyectos completan? Candidatos del propio brainstorm: SOL, SUI, TIA, JUP (ya está), POPCAT, WIF, PEPE, otros.
-
-→ Bloqueante para Fase 0 (loader necesita el archivo final).
+**Decisión**: Añadidos **SUI** (l1-maduro, validador fuera del eje EVM/SOL) y **STRK** (post-tge, ZK-STARK L2 con cliffs pesados — caso ejemplo del archetype post-tge). Watchlist completa = 30.
 
 → Documento: `docs/feedback/open-questions/2026-05-10-q10-complete-watchlist.md`
 
