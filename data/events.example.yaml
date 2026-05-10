@@ -1,0 +1,71 @@
+# Manual events curados (unlocks, listings, halvings, forks)
+# Plan B confirmado tras Q11: DeFiLlama /emissions es Pro-only ($300/mes).
+# Para el MVP, este YAML es la fuente primaria. Mantenimiento estimado: ~5-10 min/semana.
+#
+# Schema (alineado con ADR 0003 + tabla EVENTS):
+#   symbol:              ticker del proyecto (match con watchlist.symbol)
+#   event_type:          unlock|listing|halving|fork|tge|other
+#   event_date:          YYYY-MM-DD (UTC)
+#   magnitude_pct:       (opcional) % del circulating supply (solo para unlocks)
+#   allocation_category: (opcional) team|investors|ecosystem|foundation|public|unknown
+#   external_event_id:   (opcional) id de upstream para dedupe; omitir si manual
+#   notes:               (opcional) thesis/contexto
+#
+# Ponderación automática (ADR 0003): magnitude_weighted = magnitude_pct × category_weight
+#   team: 1.5, investors: 1.2, foundation/treasury: 0.8, ecosystem/community: 0.7, public/unknown: 1.0
+#
+# Hard constraint Layer 2: si magnitude_weighted >= 5% en próximas 4-8 semanas → blocked
+
+events:
+  # ─── HYPE (Hyperliquid) ─────────────────────────────────────────────
+  # Caso histórico verificado por Victor: cliff team 29-nov-2025 (3.66%)
+  # precedió drop -42% en octubre. Próximos cliffs siguen mismo schedule.
+  - symbol: HYPE
+    event_type: unlock
+    event_date: 2026-05-29
+    magnitude_pct: 3.5
+    allocation_category: team
+    notes: "Cliff team mensual aprox. Activador típico de drop 4-8w antes."
+
+  - symbol: HYPE
+    event_type: unlock
+    event_date: 2026-06-29
+    magnitude_pct: 3.5
+    allocation_category: team
+    notes: "Próximo cliff team"
+
+  # ─── STRK (Starknet) ────────────────────────────────────────────────
+  # Cliffs trimestrales investors+team. Caso ejemplo de archetype post-tge.
+  - symbol: STRK
+    event_type: unlock
+    event_date: 2026-06-15
+    magnitude_pct: 4.0
+    allocation_category: investors
+    notes: "Cliff trimestral investors (Q2 2026)"
+
+  - symbol: STRK
+    event_type: unlock
+    event_date: 2026-06-15
+    magnitude_pct: 2.5
+    allocation_category: team
+    notes: "Cliff trimestral team (Q2 2026)"
+
+  # ─── SUI ─────────────────────────────────────────────────────────────
+  # Cliffs anuales foundation. Magnitudes ~4-5% — borderline threshold.
+  - symbol: SUI
+    event_type: unlock
+    event_date: 2026-05-30
+    magnitude_pct: 1.2
+    allocation_category: foundation
+    notes: "Cliff mensual foundation (calendario público)"
+
+  # ─── ARB ejemplo histórico (no en watchlist actual) ─────────────────
+  # Mantenido como referencia de patrón — magnitudes gigantes activan amber/red.
+
+  # ─── APT, AVAX, OP, ATOM si Victor los añade más adelante ───────────
+
+  # ─── EJEMPLO no-unlock ──────────────────────────────────────────────
+  - symbol: MEGA
+    event_type: listing
+    event_date: 2026-03-15
+    notes: "TGE reciente — activa LISTING_RECENT durante 6 meses post"

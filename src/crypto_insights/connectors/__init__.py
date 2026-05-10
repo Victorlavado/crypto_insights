@@ -11,5 +11,16 @@ aislada no tira el batch (ver pipeline/batch.py).
 
 from .base import Connector, ConnectorError, build_http_client
 from .binance import BinanceConnector
+from .defillama import DeFiLlamaConnector
+from .events_manual import EventsManualConnector
+from .github import GitHubConnector
 
-__all__ = ["BinanceConnector", "Connector", "ConnectorError", "build_http_client"]
+__all__ = [
+    "BinanceConnector",
+    "Connector",
+    "ConnectorError",
+    "DeFiLlamaConnector",
+    "EventsManualConnector",
+    "GitHubConnector",
+    "build_http_client",
+]

@@ -236,6 +236,124 @@ def cmd_batch_daily(
 
 
 @app.command()
+def viability(
+    output: Annotated[
+        str | None,
+        typer.Option(
+            "--output", "-o", help="Markdown output path. Default: data/viability_report.md"
+        ),
+    ] = None,
+    *,
+    json_out: Annotated[
+        bool, typer.Option("--json", help="Output as JSON instead of writing MD")
+    ] = False,
+) -> None:
+    """Genera viability report (Layer 2) basado en último PROJECT_STATE.
+
+    Sin re-correr batch — lee del estado persistido. Muestra blocked, amber,
+    red, green con razones legibles.
+    """
+    with db_mod.connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT p.symbol, p.archetype, p.chain,
+                   ps.current_state, ps.layer2_flag, ps.reason_code,
+                   ps.reason_data, ps.reason_human, ps.batch_id, ps.updated_at
+            FROM projects p
+            LEFT JOIN project_state ps ON ps.project_id = p.id
+            ORDER BY
+                CASE COALESCE(ps.current_state, 'unknown')
+                    WHEN 'blocked' THEN 0
+                    ELSE 1
+                END,
+                CASE COALESCE(ps.layer2_flag, 'green')
+                    WHEN 'red' THEN 0
+                    WHEN 'amber' THEN 1
+                    ELSE 2
+                END,
+                p.symbol
+            """
+        ).fetchall()
+
+    projects = []
+    for r in rows:
+        projects.append(
+            {
+                "symbol": r["symbol"],
+                "archetype": r["archetype"],
+                "chain": r["chain"],
+                "current_state": r["current_state"] or "unknown",
+                "layer2_flag": r["layer2_flag"] or "green",
+                "reason_code": r["reason_code"] or "NORMAL",
+                "reason_data": json.loads(r["reason_data"]) if r["reason_data"] else {},
+                "reason_human": r["reason_human"] or "",
+                "batch_id": r["batch_id"],
+                "updated_at": r["updated_at"],
+            }
+        )
+
+    if json_out:
+        _print(projects, as_json=True)
+        return
+
+    # Markdown output
+    lines = [
+        "# Viability Report — Layer 2",
+        "",
+        f"Generado: {projects[0]['updated_at'] if projects else 'sin datos'}",
+        f"Batch ref: {projects[0]['batch_id'] if projects else '—'}",
+        "",
+        "Layer 2 evalúa viabilidad (no timing). Estados:",
+        "- **blocked**: hard constraint activada (override Layer 1)",
+        "- **red** flag: descartar como zombie / dev abandonado",
+        "- **amber** flag: revisar manualmente (listing reciente, TVL collapse)",
+        "- **green** flag: viable, Layer 1 decide timing",
+        "",
+        "## Resumen",
+        "",
+        "| Symbol | Archetype | State | Flag | Razón |",
+        "|---|---|---|---|---|",
+    ]
+    for p in projects:
+        reason_short = p["reason_human"] or "—"
+        lines.append(
+            f"| {p['symbol']} | {p['archetype']} | {p['current_state']} | "
+            f"{p['layer2_flag']} | {reason_short} |"
+        )
+
+    lines.append("")
+    lines.append("## Detalle de proyectos bloqueados / amber")
+    lines.append("")
+    has_detail = False
+    for p in projects:
+        if p["current_state"] == "blocked" or p["layer2_flag"] in ("amber", "red"):
+            has_detail = True
+            lines.append(f"### {p['symbol']}  ({p['archetype']}, {p['chain']})")
+            lines.append("")
+            lines.append(f"- **State**: `{p['current_state']}` (flag `{p['layer2_flag']}`)")
+            lines.append(f"- **Reason code**: `{p['reason_code']}`")
+            if p["reason_human"]:
+                lines.append(f"- **Razón**: {p['reason_human']}")
+            if p["reason_data"]:
+                lines.append("- **Reason data**:")
+                lines.append("  ```json")
+                for ln in json.dumps(p["reason_data"], indent=2).splitlines():
+                    lines.append(f"  {ln}")
+                lines.append("  ```")
+            lines.append("")
+    if not has_detail:
+        lines.append("(ninguno — todos los proyectos están en estado green)")
+
+    output_path = (
+        get_settings().data_dir / "viability_report.md"
+        if output is None
+        else get_settings().project_root / output
+    )
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+    typer.echo(f"Viability report written to {output_path}")
+
+
+@app.command()
 def tools(
     *,
     json_out: Annotated[bool, typer.Option("--json", help="Output as JSON")] = False,

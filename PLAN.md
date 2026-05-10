@@ -33,11 +33,13 @@ Brainstorm origen: [`docs/brainstorms/2026-05-09-crypto-tracker-brainstorm.md`](
 - [x] Pipeline batch con TaskGroup + heartbeat + cleanup huérfanos + UPSERT COALESCE
 - [x] Tests: 16 verdes
 
-### Fase 1 — Layer 2 / Filtro de viabilidad
-- [ ] Conector DeFiLlama: fees, TVL, volumen por protocolo
-- [ ] Conector GitHub: commits últimos 30/90 días, contributors activos
-- [ ] Conector unlocks: scrape DeFiLlama Unlocks o Tokenomist
-- [ ] Output: `viability_report.md` con flag verde/ámbar/rojo por proyecto
+### Fase 1 — Layer 2 / Filtro de viabilidad ✅ COMPLETADA (2026-05-10)
+- [x] Conector DeFiLlama: TVL/category via /protocols (free)
+- [x] Conector GitHub: commits 30/90d, contributors (requiere PAT)
+- [x] Conector unlocks: **events_manual** YAML (Q11 resolved: DeFiLlama /emissions = Pro-only $300/mes)
+- [x] signals/unlocks.py + fusion/layer2.py con hard constraint 5% ponderado / 4-8w
+- [x] CLI `viability`: tabla densa + drill-down → `data/viability_report.md`
+- [x] HYPE/STRK blocked confirmados con events.yaml curado
 
 ### Fase 2 — Layer 1 / Signals de positioning
 - [ ] OHLCV semanal (Binance API o CoinGecko) + cálculo consolidation breakout

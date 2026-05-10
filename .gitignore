@@ -70,6 +70,7 @@ data/cassettes/
 data/logs/
 data/labels/
 data/watchlist.yaml
+data/events.yaml
 data/excluded_addresses.yaml
 data/excluded_addresses_manual.yaml
 

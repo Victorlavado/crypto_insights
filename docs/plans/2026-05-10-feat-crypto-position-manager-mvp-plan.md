@@ -760,21 +760,27 @@ def test_dashboard_uses_cli_json_only():
 
 **Estimación real**: ~4-5h en sesión asistida.
 
-#### Fase 1 — Layer 2 (semana 2)
+#### Fase 1 — Layer 2 (semana 2) ✅ COMPLETADA (2026-05-10)
 
 **Objetivo**: filtro de viabilidad funcional con la hard constraint de unlocks.
 
-- [ ] Connector DeFiLlama (fees, TVL, volume) + tests respx.
-- [ ] Connector DeFiLlama Unlocks → puebla `EVENTS`.
-- [ ] Connector GitHub (commits últimos 30/90d, contributors).
-- [ ] Migration 0002: tablas `events`, `derived_signals`, `project_state`.
-- [ ] `signals/unlocks.py`: hard constraint 5%/4-8w.
-- [ ] `fusion/layer2.py`: cálculo de `layer2_flag` y `current_state=blocked`.
-- [ ] Output preliminar: `viability_report.md` (regenerable desde CLI) — antes del dashboard, validar lógica.
+- [x] Connector DeFiLlama (TVL/category via `/protocols` free endpoint) — `/emissions` confirmado Pro-only (Q11).
+- [x] **Q11 resuelta**: `events_manual.py` connector con `data/events.yaml` curated. Plan B (DefiLlama scrape) deferido.
+- [x] Connector GitHub (commits 30/90d, contributors) — requiere `CI_GITHUB_TOKEN`.
+- [x] Schema events/derived_signals/project_state (incluido en migration 0001).
+- [x] `signals/unlocks.py`: hard constraint 5% ponderado / 4-8w con ponderación por categoría (ADR 0003).
+- [x] `fusion/layer2.py`: cálculo de `layer2_flag` + override `current_state=blocked` cuando aplica.
+- [x] CLI `viability`: genera `data/viability_report.md` con tabla densa + drill-down.
+- [x] Hysteresis counter (`batches_in_state`) en `PROJECT_STATE` (ADR 0006).
 
-**Success criteria**: para los 30 proyectos, `crypto-insights viability` produce un report con flag green/amber/red/blocked y razones legibles. HYPE muestra blocked si hay unlock en próximas 4-8w.
+**Success criteria** ✅ HYPE blocked (5.25% weighted = team 3.5% × 1.5 cliff 2026-06-29). STRK blocked (8.55% = investors 4.0% × 1.2 + team 2.5% × 1.5 cliff 2026-06-15). MEGA amber (listing reciente). Tests: 30 verdes (suma 14 nuevos: events_manual × 6, unlocks/layer2 × 8).
 
-**Estimación**: 12-16h.
+**Bugs encontrados durante implementación**:
+- YAML 1.1 parsea hex addresses como int → reconstrucción en watchlist loader.
+- yoyo SQL inline `-- rollback:` no soportado → ficheros `*.rollback.sql` separados.
+- Same-date unlocks (team + investors) colapsaban con dedup key `(p, type, date, source)` → sintetizar `external_event_id` por categoría.
+
+**Estimación real**: ~4-6h en sesión asistida.
 
 #### Fase 2 — Layer 1 core (semanas 3-4)
 

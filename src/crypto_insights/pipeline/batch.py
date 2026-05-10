@@ -18,7 +18,7 @@ from typing import Protocol
 import httpx
 
 from .. import db as db_mod
-from ..connectors import BinanceConnector
+from ..connectors import BinanceConnector, DeFiLlamaConnector, GitHubConnector
 from ..connectors.base import ConnectorError, build_http_client
 from ..logging_config import get_logger
 from ..models import BatchResult, BatchStatus, ConnectorFailure, ConnectorResult, Project
@@ -85,10 +85,15 @@ async def _heartbeat_loop(batch_id: str, interval_seconds: int) -> None:
 def _build_connectors(client: httpx.AsyncClient) -> Sequence[_ConnectorLike]:
     """Construye conectores con el client compartido.
 
-    Fase 0: solo Binance. Cada fase futura añade aquí. Pasarse a registry
-    pattern cuando lleguen a >5 (no antes — premature abstraction).
+    Fase 0: Binance. Fase 1: + DeFiLlama, GitHub.
+    Cada fase futura añade aquí. Pasarse a registry pattern cuando lleguen
+    a >5 (no antes — premature abstraction).
     """
-    return [BinanceConnector(client)]
+    return [
+        BinanceConnector(client),
+        DeFiLlamaConnector(client),
+        GitHubConnector(client),
+    ]
 
 
 async def run_batch(target_date: date, *, dry_run: bool = False) -> BatchResult:
@@ -123,8 +128,16 @@ async def run_batch(target_date: date, *, dry_run: bool = False) -> BatchResult:
             register_batch_started(conn, batch_id)
 
     # Asegurar que projects está sincronizado con watchlist (idempotente).
+    # También sincronizamos events.yaml a la tabla EVENTS al inicio.
     with db_mod.connection() as conn:
         projects = sync_watchlist(conn) if not dry_run else list_projects(conn)
+        if not dry_run:
+            try:
+                from ..connectors.events_manual import sync_events_to_db
+
+                sync_events_to_db(conn)
+            except FileNotFoundError:
+                log.warning("events_yaml_missing", note="data/events.yaml not found; skipping")
 
     async with build_http_client() as client:
         connectors = _build_connectors(client)
@@ -168,6 +181,30 @@ async def run_batch(target_date: date, *, dry_run: bool = False) -> BatchResult:
                 ok_count += 1
             elif r.failure is not None:
                 failures.append(r.failure)
+
+    # Layer 2: evaluar viabilidad por proyecto. Si blocked, persiste directo
+    # (Layer 1 no corre en Fase 1; cuando lleguen los signals de positioning,
+    # Layer 1 tomará el relevo para proyectos no-bloqueados).
+    from ..fusion.layer2 import evaluate_layer2, upsert_layer2_state
+
+    with db_mod.connection() as conn:
+        for project in projects:
+            try:
+                with db_mod.transaction(conn):
+                    layer2_result = evaluate_layer2(conn, project, target_date)
+                    upsert_layer2_state(conn, layer2_result, batch_id)
+                    if layer2_result.blocked:
+                        log.info(
+                            "layer2_blocked",
+                            project=project.symbol,
+                            reason_code=layer2_result.reason_code.value,
+                            total_weighted=round(layer2_result.unlock_result.total_weighted, 2)
+                            if layer2_result.unlock_result
+                            else None,
+                        )
+            except Exception as e:
+                # Layer 2 falla aislada no tira el batch.
+                log.exception("layer2_evaluation_failed", project=project.symbol, error=str(e))
 
     # Determinar status final
     if not failures:
