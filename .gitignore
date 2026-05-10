@@ -64,6 +64,7 @@ data/crypto.db
 data/crypto.db-wal
 data/crypto.db-shm
 data/crypto.db-journal
+data/_smoke_test*.db*
 data/backups/
 data/cassettes/
 data/logs/

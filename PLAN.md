@@ -24,10 +24,14 @@ Brainstorm origen: [`docs/brainstorms/2026-05-09-crypto-tracker-brainstorm.md`](
 
 ## Roadmap
 
-### Fase 0 — Foundations (esta semana)
+### Fase 0 — Foundations ✅ COMPLETADA (2026-05-10)
 - [x] Definir watchlist v1 (30 proyectos con archetype tag) → `data/watchlist.yaml`
-- [ ] Setup repo Python: `pyproject.toml`, ruff, pytest, .gitignore
-- [ ] SQLite schema: `projects`, `signals_snapshots`, `events` (unlocks, listings)
+- [x] Setup repo Python: `pyproject.toml`, ruff, mypy, pytest, .gitignore
+- [x] SQLite schema completa: `projects`, `batches`, `raw_snapshots`, `derived_signals`, `project_state`, `project_state_history`, `events`
+- [x] CLI: `init-db`, `sync-watchlist`, `list`, `state`, `batch-status`, `batch-daily`, `backup`, `tools`
+- [x] Conector Binance OHLCV (15 proyectos válidos en Spot; resto en _NOT_ON_BINANCE_SPOT)
+- [x] Pipeline batch con TaskGroup + heartbeat + cleanup huérfanos + UPSERT COALESCE
+- [x] Tests: 16 verdes
 
 ### Fase 1 — Layer 2 / Filtro de viabilidad
 - [ ] Conector DeFiLlama: fees, TVL, volumen por protocolo

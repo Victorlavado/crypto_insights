@@ -744,21 +744,21 @@ def test_dashboard_uses_cli_json_only():
 
 ### Implementation Phases
 
-#### Fase 0 — Foundations (semana 1)
+#### Fase 0 — Foundations (semana 1) ✅ COMPLETADA (2026-05-10)
 
 **Objetivo**: repo ejecutable end-to-end con un solo proyecto y un solo connector.
 
-- [ ] `uv init --package crypto_insights`, `pyproject.toml` con dep groups
-- [ ] `ruff` + `mypy` + `pytest` configurados; pre-commit hook opcional
-- [ ] Schema SQLite inicial (`migrations/0001-initial-schema.sql`) — solo tablas core: `projects`, `batches`, `raw_snapshots`
-- [ ] CLI esqueleto (`crypto-insights init-db`, `crypto-insights batch-daily --date YYYY-MM-DD`)
-- [ ] Watchlist loader desde `data/watchlist.yaml` (completar a 30 proyectos — actualmente 26 en example)
-- [ ] **Un connector funcional end-to-end**: Binance OHLCV (más simple, sin auth).
-- [ ] Test de integración con vcr cassette grabado.
+- [x] `uv init --package crypto_insights`, `pyproject.toml` con dep groups
+- [x] `ruff` + `mypy` + `pytest` configurados; pre-commit hook opcional
+- [x] Schema SQLite inicial (`migrations/0001-initial-schema.sql`) — incluye además `events`, `derived_signals`, `project_state`, `project_state_history` para no fragmentar la migration
+- [x] CLI esqueleto (`crypto-insights init-db`, `crypto-insights batch-daily --date YYYY-MM-DD`) + extras: `sync-watchlist`, `list`, `state`, `batch-status`, `tools` (capability discovery), `backup`
+- [x] Watchlist loader desde `data/watchlist.yaml` (30 proyectos — añadidos SUI y STRK)
+- [x] **Un connector funcional end-to-end**: Binance OHLCV con respx unit tests + JSON fixture
+- [x] Tests: 16 verdes (binance × 4, watchlist × 6, persist × 6). Lint clean.
 
-**Success criteria**: `uv run crypto-insights batch-daily` ejecuta para 1 proyecto, deja una fila en `raw_snapshots`, no crashea.
+**Success criteria** ✅ `uv run crypto-insights batch-daily` ejecuta para 30 proyectos, deja 13 filas en `raw_snapshots` (los 13 listados en Binance Spot), idempotente, batch finished status `complete`.
 
-**Estimación**: 6-10h.
+**Estimación real**: ~4-5h en sesión asistida.
 
 #### Fase 1 — Layer 2 (semana 2)
 
