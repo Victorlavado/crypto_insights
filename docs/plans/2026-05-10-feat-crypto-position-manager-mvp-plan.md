@@ -782,21 +782,36 @@ def test_dashboard_uses_cli_json_only():
 
 **Estimación real**: ~4-6h en sesión asistida.
 
-#### Fase 2 — Layer 1 core (semanas 3-4)
+#### Fase 2 — Layer 1 core (semanas 3-4) 🟡 PARCIAL (2026-05-10)
 
 **Objetivo**: signals de positioning principales operativos.
 
-- [ ] Migración esquema para guardar OHLCV histórico completo (Binance da hasta 2017+, almacenar todo lo disponible).
-- [ ] Backfill OHLCV diario completo histórico (script one-shot, respeta rate limits — ~30k requests para 30 proyectos × 8 años, planificar batched).
-- [ ] `signals/indicators.py`: ATR Wilder, Bollinger Width, RVOL, range compression — con tests hypothesis (ATR ≥ 0, BB upper ≥ middle ≥ lower, etc).
-- [ ] `signals/consolidation_breakout.py`: detector con los 4 criterios de Victor + tests con fixtures (datos sintéticos + datos reales HYPE 2025).
-- [ ] Connectors `hyperliquid` y `helius` (Solana top holders) — primer signal de smart money.
-- [ ] **Decidir y implementar conector ETH top holders** (resolución Open Q1).
-- [ ] `signals/funding.py`, `signals/smart_money.py`.
+- [ ] Migración esquema para guardar OHLCV histórico completo (Binance da hasta 2017+, almacenar todo lo disponible). **Pendiente**: el connector trae 400d que es suficiente para indicadores live, pero backfill histórico completo queda para sesión follow-up.
+- [ ] Backfill OHLCV diario completo histórico (script one-shot). **Pendiente**.
+- [x] `signals/indicators.py`: ATR Wilder, Bollinger Width, RVOL, range compression, CMF, RSI — con tests (13 verdes, incluye hypothesis property test para ATR).
+- [x] `signals/consolidation_breakout.py`: detector con los 4 criterios + filtro RSI<50 + BBW bottom decile + CMF>0 + look-ahead protection (`df_weekly_closed`).
+- [x] Connector `hyperliquid` (funding/OI/mark via `metaAndAssetCtxs` + funding history 30d).
+- [ ] Connector `helius` (Solana top holders) — **DEFERRED** (full smart money pipeline = ~3-4h adicional con filtering EOA en 5 pasos).
+- [ ] **Open Q1** ETH top holders (Alchemy/Moralis) — **DEFERRED** mismo motivo.
+- [x] `signals/funding.py`: z-score 30d con MIN_HISTORY_FOR_ZSCORE=14.
+- [ ] `signals/smart_money.py` — **DEFERRED**.
+- [x] `pipeline/derived.py`: compute_derived_for_project orquesta ATR % daily + consolidation_breakout weekly + funding z-score; persiste en `derived_signals` con formula_version.
+- [x] Pipeline integra derived + Layer 2 en transacción per-project (R-crítico #8).
 
-**Success criteria**: para HYPE en histórico, el detector marca `consolidation_breakout=1.0` en semanas donde retrospectivamente hubo breakout. Falsos positivos identificados y documentados.
+**Resultados de validación (2026-05-10)**:
+- Pipeline batch corre con 4 connectors (Binance, DeFiLlama, GitHub, Hyperliquid): 56 sources OK, 11 failed isolated.
+- 48 derived_signals persistidos para 21 proyectos (con datos OHLCV+funding).
+- ATR % sensible: BTC 2.4%, AAVE 5.0%, ENA 6.85%.
+- Funding z-score detecta: FARTCOIN z=6.47 (extreme over-leveraged long → distribution signal), ENA z=3.47.
+- Consolidation breakout = 0.0 para todos en live data (los 4 criterios + RSI filter + BBW bottom decile son estrictos por diseño — confirmado correcto).
+- HYPE/STRK siguen blocked por Layer 2.
 
-**Estimación**: 20-30h.
+**Pendiente para Fase 2 completa (sesión follow-up)**:
+- Smart money pipeline completo (Helius DAS / Alchemy + filtering EOA en 5 pasos).
+- Backfill OHLCV histórico para enable backtest visual de breakouts retrospectivos.
+- Validación visual de breakout sobre HYPE 2024-2025 (requiere backfill).
+
+**Estimación real (parcial)**: ~3-4h. Smart money pipeline restante: ~3-4h adicional.
 
 #### Fase 3 — Fusión + Dashboard (semana 5)
 

@@ -18,7 +18,12 @@ from typing import Protocol
 import httpx
 
 from .. import db as db_mod
-from ..connectors import BinanceConnector, DeFiLlamaConnector, GitHubConnector
+from ..connectors import (
+    BinanceConnector,
+    DeFiLlamaConnector,
+    GitHubConnector,
+    HyperliquidConnector,
+)
 from ..connectors.base import ConnectorError, build_http_client
 from ..logging_config import get_logger
 from ..models import BatchResult, BatchStatus, ConnectorFailure, ConnectorResult, Project
@@ -93,6 +98,7 @@ def _build_connectors(client: httpx.AsyncClient) -> Sequence[_ConnectorLike]:
         BinanceConnector(client),
         DeFiLlamaConnector(client),
         GitHubConnector(client),
+        HyperliquidConnector(client),
     ]
 
 
@@ -182,15 +188,18 @@ async def run_batch(target_date: date, *, dry_run: bool = False) -> BatchResult:
             elif r.failure is not None:
                 failures.append(r.failure)
 
-    # Layer 2: evaluar viabilidad por proyecto. Si blocked, persiste directo
-    # (Layer 1 no corre en Fase 1; cuando lleguen los signals de positioning,
-    # Layer 1 tomará el relevo para proyectos no-bloqueados).
+    # Per-project transacción: derived signals + Layer 2 + (futuro Layer 1)
+    # Garantiza que crash a mitad deja N proyectos consistentes y M no
+    # actualizados, nunca uno en estado intermedio (R-crítico #8).
     from ..fusion.layer2 import evaluate_layer2, upsert_layer2_state
+    from .derived import compute_derived_for_project, persist_derived_for_project
 
     with db_mod.connection() as conn:
         for project in projects:
             try:
                 with db_mod.transaction(conn):
+                    derived = compute_derived_for_project(conn, project, target_date)
+                    persist_derived_for_project(conn, derived, batch_id)
                     layer2_result = evaluate_layer2(conn, project, target_date)
                     upsert_layer2_state(conn, layer2_result, batch_id)
                     if layer2_result.blocked:

@@ -14,6 +14,7 @@ from .binance import BinanceConnector
 from .defillama import DeFiLlamaConnector
 from .events_manual import EventsManualConnector
 from .github import GitHubConnector
+from .hyperliquid import HyperliquidConnector
 
 __all__ = [
     "BinanceConnector",
@@ -22,5 +23,6 @@ __all__ = [
     "DeFiLlamaConnector",
     "EventsManualConnector",
     "GitHubConnector",
+    "HyperliquidConnector",
     "build_http_client",
 ]
