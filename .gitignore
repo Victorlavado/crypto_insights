@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# uv
+.uv-cache/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+coverage.xml
+*.cover
+.cache
+
+# mypy / ruff
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data (local-only)
+data/crypto.db
+data/crypto.db-wal
+data/crypto.db-shm
+data/crypto.db-journal
+data/backups/
+data/cassettes/
+data/logs/
+data/labels/
+data/watchlist.yaml
+data/excluded_addresses.yaml
+data/excluded_addresses_manual.yaml
+
+# Secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Streamlit cache
+.streamlit/
+
+# Screenshots locales (no añadirlas al repo a menos que se piden)
+Captura de pantalla*.png
+*.screenshot.png
+
+# Claude Code local settings (project-shared settings van en .claude/settings.json si se quiere)
+.claude/settings.local.json

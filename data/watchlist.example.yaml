@@ -1,0 +1,223 @@
+# Watchlist MVP — 30 proyectos curados manualmente
+# Este es un EJEMPLO. Renombra a watchlist.yaml y ajusta a tus 30 candidatos.
+#
+# Campos:
+#   symbol:       ticker como aparece en CoinGecko/Binance
+#   coingecko_id: id de CoinGecko (para fees, tvl, market data)
+#   archetype:    uno de [memecoin-brand, infra-pmf, tesis-macro, l1-maduro, defi-blue-chip, post-tge]
+#   chain:        red principal donde vive el token (para queries on-chain)
+#   contract:     dirección del contrato (necesaria para top holders / smart money)
+#   notes:        thesis breve para recordarte por qué lo seguías
+
+projects:
+  - symbol: HYPE
+    coingecko_id: hyperliquid
+    archetype: infra-pmf
+    chain: hyperliquid
+    contract: native
+    notes: "Perp DEX líder, $800M-1B revenue anualizado, buybacks vía fees"
+
+  - symbol: ZEC
+    coingecko_id: zcash
+    archetype: tesis-macro
+    chain: zcash
+    contract: native
+    notes: "Privacy revival, halving nov-2025, shielded supply growing"
+
+  - symbol: PENGU
+    coingecko_id: pudgy-penguins
+    archetype: memecoin-brand
+    chain: solana
+    contract: 2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv
+    notes: "Brand expansion (Walmart, K-pop). VIGILAR: holders únicos vs distribución vieja"
+
+  - symbol: NEAR
+    coingecko_id: near
+    archetype: l1-maduro  # REVISAR: si el driver del trade es la narrativa AI agents, mover a tesis-macro
+    chain: near
+    contract: native
+    notes: "Branded as the native L1 with catalyst designed to boost agent adoption"
+
+  - symbol: TAO
+    coingecko_id: bittensor
+    archetype: tesis-macro
+    chain: Bittensor
+    contract: native
+    notes: "L1 cuya tesis de inversión es decentralized AI: subnet emissions y mindshare AI mueven el precio, no flows tipo L1 generalista"
+
+  - symbol: VIRTUAL
+    coingecko_id: virtual-protocol
+    archetype: tesis-macro
+    chain: base
+    contract: 0x44ff8620b8ca30902395a7bd3f2407e1a091bf73
+    notes: "Virtuals Protocol is a launchpad platform that enables users to create, tokenize, and monetize AI agents for gaming, entertainment, and virtual environments"
+
+  - symbol: VVV
+    coingecko_id: venice-token
+    archetype: tesis-macro
+    chain: base
+    contract: 0xacfe6019ed1a7dc6f7b508c02d1b04ec88cc21bf
+    notes: "Platform that allows to use any AI model in a private way with buil-in privacy and without any descriptions"
+
+  - symbol: AKT
+    coingecko_id: akash-network
+    archetype: tesis-macro
+    chain: akash
+    contract: native
+    notes: "DePIN compute marketplace sobre Cosmos. Misma narrativa que RENDER/HNT — no es L1 generalista, signals = AI compute demand"
+
+  - symbol: GRASS
+    coingecko_id: grass
+    archetype: tesis-macro
+    chain: solana
+    contract: Grass7B4RdKfBCjTKgSqnXkqjwiGvQyFbuSCUJr3XXjs
+    notes: "Grass is a decentralized network sharing application that allows users to sell their unused bandwidth. It works by allowing verified institutions to reward users directly for supplying the bandwidth they need to enhance their online services."
+
+  - symbol: RENDER
+    coingecko_id: render-token
+    archetype: tesis-macro
+    chain: ethereum
+    contract: 0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24
+    notes: "The Render Network is a leading decentralized GPU compute platform for applications ranging from 3D rendering to machine learning and generative AI."
+
+  - symbol: elizaOS
+    coingecko_id: elizaos
+    archetype: tesis-macro
+    chain: solana
+    contract: DuMbhu7mvQvqQHGcnikDgb4XegXJRyhUBfdU22uELiZA
+    notes: "The Operating System for AI Agents"
+
+  - symbol: MEGA
+    coingecko_id: megaeth
+    archetype: post-tge
+    chain: Megaeth (ethereum)
+    contract: 0x28b7e77f82b25b95953825f1e3ea0e36c1c29861
+    notes: "A novel L2 network on ethereum that has some unique apps built on top of it. Interesting dynamics regading MegaUSD (USDM)"
+
+  - symbol: MON
+    coingecko_id: monad
+    archetype: post-tge
+    chain: monad
+    contract: native
+    notes: "Monad is a high-performance Layer 1 blockchain that processes 10,000 transactions per second with near-zero fees while maintaining complete compatibility with the Ethereum Virtual Machine."
+
+  - symbol: BTC
+    coingecko_id: bitcoin
+    archetype: l1-maduro
+    chain: bitcoin
+    contract: native
+    notes: "Bitcoin is the world's first decentralized cryptocurrency that enables peer-to-peer electronic cash transactions without intermediaries like banks or governments."
+
+  - symbol: SYRUP
+    coingecko_id: syrup
+    archetype: defi-blue-chip
+    chain: ethereum
+    contract: 0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66
+    notes: "Maple is the leader in onchain asset management. Through institutional-grade lending and yield strategies, we bring the rigor of traditional finance to the transparency and innovation of crypto"
+
+  - symbol: FXN
+    coingecko_id: fxn-token
+    archetype: tesis-macro
+    chain: ethereum
+    contract: 0x365accfca291e7d3914637abf1f7635db165bb09
+    notes: "Perp trading sin riesgo de liquidación + stablecoin sin coste recurrente. Tesis: nuevo mecanismo de derivados, no blue-chip aún"
+
+  - symbol: HNT
+    coingecko_id: helium
+    archetype: tesis-macro
+    chain: solana
+    contract: hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux
+    notes: "Helium (HNT) is a decentralized blockchain network for IoT devices. It enables devices to communicate and share data across the network by connecting to nodes called Hotspots. These Hotspots serve as wireless gateways and blockchain miners, allowing users to mine and earn the native token HNT as rewards."
+
+  - symbol: JUP
+    coingecko_id: jupiter-exchange-solana
+    archetype: defi-blue-chip
+    chain: solana
+    contract: JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN
+    notes: "Jupiter is a decentralized exchange (DEX) aggregator that allows users to swap tokens at optimal prices with low slippage and transaction fees in the Solana ecosystem"
+
+  - symbol: CHIP
+    coingecko_id: chip-2
+    archetype: tesis-macro
+    chain: arbitrum (ethereum)
+    contract: 0x0c1c1c109fe34733fca54b82d7b46b75cfb71f6e
+    notes: "Stablecoin colateralizado por GPUs/compute. Tesis = AI infra demand, no momentum post-TGE. Driver: AI capex narrative"
+
+  - symbol: AAVE
+    coingecko_id: aave
+    archetype: defi-blue-chip
+    chain: ethereum
+    contract: 0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9
+    notes: "Aave is a decentralized money market protocol where users can lend and borrow cryptocurrency across 20 different assets as collateral."
+
+  - symbol: PENDLE
+    coingecko_id: pendle
+    archetype: defi-blue-chip
+    chain: ethereum
+    contract: 0x808507121b80c02388fad14726482e061b8da827
+    notes: "Pendle is the most dominant yield layer in all defi"
+
+  - symbol: FARTCOIN
+    coingecko_id: fartcoin
+    archetype: memecoin-brand
+    chain: solana
+    contract: 9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump
+    notes: "One of the most aggresive memecoins when it come to pumps"
+
+  - symbol: ENA
+    coingecko_id: ethena
+    archetype: defi-blue-chip
+    chain: ethereum
+    contract: 0x57e114b691db790c35207b2e685d4a43181e6061
+    notes: "Ethena is a synthetic dollar protocol built on Ethereum that provides a crypto-native solution for money that is not reliant on traditional banking system infrastructure. Its synthetic dollar USDe is known as the 'Internet Bond' and offers a dollar-denominated savings instrument with the benefits of DeFi."
+
+  - symbol: PUMP
+    coingecko_id: pump-fun
+    archetype: infra-pmf
+    chain: solana
+    contract: pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn
+    notes: "Token del launchpad, no una memecoin. Mismo perfil que HYPE: revenue medible por fees de launches, PMF demostrado"
+
+  - symbol: TON
+    coingecko_id: the-open-network
+    archetype: l1-maduro
+    chain: ton
+    contract: EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c
+    notes: "TON (The Open Network) is a Layer 1 smart contract network specializing in financial applications. It was first developed by Telegram’s co-founder Nikolai Durov known as “Telegram Open Network” but has been relaunched as “The Open Network” under the TON Foundation"
+
+  - symbol: MORPHO
+    coingecko_id: morpho
+    archetype: defi-blue-chip
+    chain: ethereum
+    contract: 0x9994e35db50125e0df82e4c2dde62496ce330999
+    notes: "Lending protocol layer encima de Aave/Compound. Diversifica defi blue-chip fuera de lending puro tradicional. TVL growing fast en 2025."
+
+  - symbol: SPX6900
+    coingecko_id: spx6900
+    archetype: memecoin-brand
+    chain: ethereum
+    contract: 0x40fa1a04f9bb96a8f78ce1ee8ee81a4c9ba62b0c
+    notes: "Memecoin con narrativa S&P 6900 (parodia financiera). Brand consistente, comunidad fuerte. Comparar archetype memecoin-brand contra PENGU/FARTCOIN."
+
+  - symbol: PEPE
+    coingecko_id: pepe
+    archetype: memecoin-brand
+    chain: ethereum
+    contract: 0x6982508145454ce325ddbe47a25d4ec3d2311933
+    notes: "Memecoin de referencia post-2023, top-tier en supply distribution y holders count. Validador histórico del archetype memecoin-brand."
+
+  - symbol: SUI
+    coingecko_id: sui
+    archetype: l1-maduro
+    chain: sui
+    contract: native
+    notes: "L1 Move-based con object-centric model. Cliffs anuales (~4-5% foundation) — vigilar via EVENTS. Validador de l1-maduro fuera del eje EVM/SOL."
+
+  - symbol: STRK
+    coingecko_id: starknet
+    archetype: post-tge
+    chain: starknet (ethereum L2)
+    contract: 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d
+    notes: "L2 ZK-STARK, post-TGE en distribución pesada (cliffs investors+team). Caso ejemplo de archetype post-tge: tracking de unlocks domina la tesis."
+
+  # Watchlist completa = 30 proyectos.
