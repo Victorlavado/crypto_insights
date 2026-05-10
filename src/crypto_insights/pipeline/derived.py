@@ -110,6 +110,21 @@ def compute_derived_for_project(
                     )
                 )
 
+    # DeFiLlama TVL change 7d (proxy de tvl_fees_trend)
+    llama_payload = _latest_payload(conn, project.id, "defillama")
+    if llama_payload:
+        change_7d = llama_payload.get("change_7d_pct")
+        if isinstance(change_7d, (int, float)) and not math.isnan(change_7d):
+            out.append(
+                DerivedSignal(
+                    project_id=project.id,
+                    signal_date=signal_date,
+                    signal_name="tvl_change_30d_pct",  # alias for tvl_fees_trend
+                    value=float(change_7d),  # using 7d as proxy until /tvl endpoint integrated
+                    formula_version="v1-7dproxy",
+                )
+            )
+
     hl_payload = _latest_payload(conn, project.id, "hyperliquid")
     if hl_payload:
         zr = compute_funding_zscore(hl_payload)

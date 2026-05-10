@@ -41,18 +41,24 @@ Brainstorm origen: [`docs/brainstorms/2026-05-09-crypto-tracker-brainstorm.md`](
 - [x] CLI `viability`: tabla densa + drill-down → `data/viability_report.md`
 - [x] HYPE/STRK blocked confirmados con events.yaml curado
 
-### Fase 2 — Layer 1 / Signals de positioning
-- [ ] OHLCV semanal (Binance API o CoinGecko) + cálculo consolidation breakout
-- [ ] Funding/OI: Hyperliquid API → fallback Binance
-- [ ] Smart money: scrape semanal Etherscan/Solscan top 50 holders + delta
-- [ ] CEX netflows como proxy complementario
-- [ ] Mindshare: Kaito scrape o free tier
+### Fase 2 — Layer 1 / Signals de positioning 🟡 PARCIAL (2026-05-10)
+- [x] Indicadores TA a mano: ATR Wilder, BB Width, RVOL, range compression, CMF, RSI Wilder (13 tests)
+- [x] Consolidation breakout detector: 4 criterios + RSI<50 filter + BBW bottom decile + CMF>0 + look-ahead protection
+- [x] Funding/OI: Hyperliquid `metaAndAssetCtxs` + fundingHistory 30d + z-score
+- [ ] **DEFERRED**: Smart money pipeline (Helius DAS / Alchemy + 5-step EOA filtering)
+- [ ] **DEFERRED**: CEX netflows (Open Q3 — recomendación: omitir MVP, evaluar Fase 4)
+- [ ] **DEFERRED**: Mindshare (Open Q2 — Kaito sin free, gap explícito)
+- [ ] **DEFERRED**: OHLCV histórico backfill completo (script one-shot)
 
-### Fase 3 — Fusión por archetype + Dashboard
-- [ ] Reglas por archetype con pesos hardcoded (Opción 1 del brainstorm)
-- [ ] Cálculo de estado por proyecto
-- [ ] CLI dashboard: tabla con `rich` o markdown report regenerado
-- [ ] Snapshot histórico para review semanal
+### Fase 3 — Fusión por archetype + Dashboard ✅ COMPLETADA (2026-05-10)
+- [x] `fusion/archetype_rules.py`: tabla pesos (6 archetypes × 8 signals = 1.0 cada columna) + normalize_signal con clipping a [-1,1]
+- [x] `fusion/layer1.py`: composite_score con renormalize sobre signals presentes + gap policy (ADR 0005: ≥30% missing → degraded)
+- [x] state_from_score con thresholds (>0.6 aceleración, >0.3 acumulación, etc) + reset detection desde colapso
+- [x] Pipeline integra Layer 1 después de Layer 2 (solo para non-blocked)
+- [x] Hysteresis counter batches_in_state se incrementa/resetea correctamente (ADR 0006)
+- [x] `streamlit_app.py`: dashboard con tabs por archetype + drill-down + crear feedback + cache TTL 1h con batch_id invalidador
+- [x] Agent-native parity verificada: streamlit_app.py NO tiene SQL inline (consume `dashboard.api`)
+- [x] CLI `viability` genera markdown report regenerable
 
 ### Fase 4 — Iteración con feedback
 - [ ] Primer ciclo de review semanal con `docs/feedback/` activo

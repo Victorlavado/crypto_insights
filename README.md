@@ -13,19 +13,48 @@ uv python install 3.12
 # 2. Sincronizar entorno reproducible desde uv.lock
 uv sync --all-groups
 
-# 3. Crear DB + aplicar migraciones
-uv run crypto-insights init-db
+# 3. Configurar API keys opcionales (recomendado: GitHub PAT)
+copy .env.example .env  # editar con tus keys
 
-# 4. Cargar watchlist (30 proyectos)
+# 4. Crear DB + aplicar migraciones + cargar watchlist + events
+uv run crypto-insights init-db
 uv run crypto-insights sync-watchlist
 
-# 5. Ejecutar batch diario para hoy
+# 5. (Opcional) Personalizar data/events.yaml con tus unlocks curados
+#    El default es data/events.example.yaml que sirve como fallback.
+
+# 6. Ejecutar batch diario para hoy
 uv run crypto-insights batch-daily
 
-# 6. Ver resultado
-uv run crypto-insights batch-status --latest --json
-uv run crypto-insights list --json
+# 7. Lanzar dashboard Streamlit (http://localhost:8501)
+uv run crypto-ui
+# o equivalente: uv run streamlit run streamlit_app.py
 ```
+
+### API keys (.env)
+
+Almacenadas en `.env` con prefijo `CI_` (gitignored). Documentar en `.env.example`:
+
+```
+CI_GITHUB_TOKEN=ghp_...           # recomendado — sin esto github connector se salta
+CI_COINGECKO_API_KEY=...           # opcional
+CI_ALCHEMY_API_KEY=...             # Open Q1 — pendiente para Fase 2 (smart money ETH)
+CI_HELIUS_API_KEY=...              # pendiente para Fase 2 (smart money Solana)
+CI_ETHERSCAN_API_KEY=...           # opcional (multichain v2)
+```
+
+### Programar el batch en Windows (Task Scheduler)
+
+1. Abrir **Task Scheduler** → Create Basic Task.
+2. **Trigger**: Daily, 09:00 UTC (`11:00` Europe/Madrid en horario CET, `10:00` CEST).
+3. **Action**: Start a program.
+   - Program: `C:\Users\<user>\Documentos\Develop\Crypto_insights\.venv\Scripts\python.exe`
+   - Arguments: `-m crypto_insights.cli batch-daily`
+   - Start in: `C:\Users\<user>\Documentos\Develop\Crypto_insights`
+4. **Settings**:
+   - Wake the computer to run this task ✓
+   - If the task fails, restart every 30 minutes (max 3 attempts)
+5. **Logs**: stdout/stderr van a `data/logs/batch-YYYYMMDD.log` automáticamente vía structlog (ver `src/crypto_insights/logging_config.py`).
 
 ## CLI
 

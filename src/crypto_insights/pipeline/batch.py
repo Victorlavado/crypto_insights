@@ -188,9 +188,10 @@ async def run_batch(target_date: date, *, dry_run: bool = False) -> BatchResult:
             elif r.failure is not None:
                 failures.append(r.failure)
 
-    # Per-project transacción: derived signals + Layer 2 + (futuro Layer 1)
+    # Per-project transacción: derived signals + Layer 2 + Layer 1.
     # Garantiza que crash a mitad deja N proyectos consistentes y M no
     # actualizados, nunca uno en estado intermedio (R-crítico #8).
+    from ..fusion.layer1 import evaluate_layer1, upsert_layer1_state
     from ..fusion.layer2 import evaluate_layer2, upsert_layer2_state
     from .derived import compute_derived_for_project, persist_derived_for_project
 
@@ -201,8 +202,10 @@ async def run_batch(target_date: date, *, dry_run: bool = False) -> BatchResult:
                     derived = compute_derived_for_project(conn, project, target_date)
                     persist_derived_for_project(conn, derived, batch_id)
                     layer2_result = evaluate_layer2(conn, project, target_date)
-                    upsert_layer2_state(conn, layer2_result, batch_id)
+
                     if layer2_result.blocked:
+                        # Layer 2 override → blocked persiste directo, Layer 1 no corre
+                        upsert_layer2_state(conn, layer2_result, batch_id)
                         log.info(
                             "layer2_blocked",
                             project=project.symbol,
@@ -211,9 +214,22 @@ async def run_batch(target_date: date, *, dry_run: bool = False) -> BatchResult:
                             if layer2_result.unlock_result
                             else None,
                         )
+                    else:
+                        # Layer 1 corre: composite score + state
+                        prior = conn.execute(
+                            "SELECT current_state FROM project_state WHERE project_id = ?",
+                            (project.id,),
+                        ).fetchone()
+                        from ..models import ProjectStateValue as _PSV
+
+                        prior_state = _PSV(prior["current_state"]) if prior else None
+                        layer1_result = evaluate_layer1(conn, project, prior_state=prior_state)
+                        upsert_layer1_state(
+                            conn, project, layer1_result, layer2_result.flag.value, batch_id
+                        )
             except Exception as e:
-                # Layer 2 falla aislada no tira el batch.
-                log.exception("layer2_evaluation_failed", project=project.symbol, error=str(e))
+                # Falla aislada por proyecto no tira el batch.
+                log.exception("fusion_evaluation_failed", project=project.symbol, error=str(e))
 
     # Determinar status final
     if not failures:

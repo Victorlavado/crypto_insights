@@ -1,11 +1,23 @@
 ---
 title: Crypto Position Manager MVP — implementación
 type: feat
-status: active
+status: completed
 date: 2026-05-10
+completed_at: 2026-05-10
 origin: docs/brainstorms/2026-05-09-crypto-tracker-brainstorm.md
 related_adrs:
   - docs/decisions/0001-two-layer-signal-model.md
+  - docs/decisions/0002-stack-tecnico.md
+  - docs/decisions/0003-unlocks-hard-constraint.md
+  - docs/decisions/0004-consolidation-breakout-spec.md
+  - docs/decisions/0005-gap-policy.md
+  - docs/decisions/0006-state-machine-transitions.md
+completion_notes: |
+  Fase 0 (Foundations), Fase 1 (Layer 2 viability), Fase 3 (Fusion + Dashboard)
+  completas. Fase 2 (Layer 1 signals) parcial — indicators + consolidation breakout
+  + Hyperliquid funding + derived signals computation hechos. Smart money pipeline
+  (Helius/Alchemy + 5-step EOA filtering) DEFERRED para sesión follow-up.
+  4 commits, 43 tests, lint clean, agent-native parity verificada.
 ---
 
 # Crypto Position Manager MVP — implementación
@@ -813,15 +825,19 @@ def test_dashboard_uses_cli_json_only():
 
 **Estimación real (parcial)**: ~3-4h. Smart money pipeline restante: ~3-4h adicional.
 
-#### Fase 3 — Fusión + Dashboard (semana 5)
+#### Fase 3 — Fusión + Dashboard (semana 5) ✅ COMPLETADA (2026-05-10)
 
 **Objetivo**: dashboard Streamlit con estado por proyecto.
 
-- [ ] `fusion/archetype_rules.py` con tabla de pesos (la de arriba).
-- [ ] `fusion/layer1.py`: composite score y `state_from_scores()`.
-- [ ] `streamlit_app.py`: layout descrito, tabs por archetype, drill-down básico.
-- [ ] Botón "Crear feedback" genera archivo en `docs/feedback/`.
-- [ ] Setup Windows Task Scheduler ejecutando `uv run crypto-insights batch-daily` a las 9:00 UTC diario (mercado cierra/abre en ventana razonable).
+- [x] `fusion/archetype_rules.py` con tabla de pesos (la de arriba).
+- [x] `fusion/layer1.py`: composite score y `state_from_scores()` con gap policy híbrida (ADR 0005).
+- [x] `streamlit_app.py`: layout con tabs por archetype + tab `blocked` + drill-down + cache TTL 1h con batch_id invalidador.
+- [x] Botón "Crear feedback" genera archivo en `docs/feedback/YYYY-MM-DD-N.md`.
+- [x] Instrucciones Windows Task Scheduler documentadas en README.
+
+**Success criteria** ✅ El usuario puede `uv run crypto-ui` y ver los 30 proyectos clasificados. HYPE/STRK aparecen en tab `blocked` con razón explícita. Tabs por archetype muestran composite_score, layer2_flag, has_gaps. Drill-down por proyecto muestra signal contributions individuales. Agent-native parity verificada: streamlit_app.py NO tiene SQL inline.
+
+**Estimación real**: ~3h.
 
 **Success criteria**: Victor abre `streamlit run streamlit_app.py`, ve los 30 proyectos clasificados, identifica al menos 1 acumulación o 1 distribución detectada por la herramienta que no había visto manualmente.
 
