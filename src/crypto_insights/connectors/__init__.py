@@ -14,7 +14,9 @@ from .binance import BinanceConnector
 from .defillama import DeFiLlamaConnector
 from .events_manual import EventsManualConnector
 from .github import GitHubConnector
+from .helius import HeliusConnector
 from .hyperliquid import HyperliquidConnector
+from .moralis import MoralisConnector
 
 __all__ = [
     "BinanceConnector",
@@ -23,6 +25,8 @@ __all__ = [
     "DeFiLlamaConnector",
     "EventsManualConnector",
     "GitHubConnector",
+    "HeliusConnector",
     "HyperliquidConnector",
+    "MoralisConnector",
     "build_http_client",
 ]

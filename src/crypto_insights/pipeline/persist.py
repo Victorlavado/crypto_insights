@@ -162,3 +162,52 @@ def upsert_derived_signal(conn: sqlite3.Connection, signal: DerivedSignal, batch
             signal.formula_version,
         ),
     )
+
+
+def upsert_ohlcv_candles(
+    conn: sqlite3.Connection,
+    project_id: int,
+    candles: Iterable[dict[str, Any]],
+    *,
+    source: str = "binance",
+) -> int:
+    """UPSERT batch de candles diarios en ohlcv_daily. Retorna cantidad escrita.
+
+    Idempotente por (project_id, candle_date). Re-correr backfill no duplica.
+    """
+    from datetime import UTC, datetime
+
+    n = 0
+    for c in candles:
+        candle_date = datetime.fromtimestamp(c["open_time"] / 1000, tz=UTC).date().isoformat()
+        conn.execute(
+            """
+            INSERT INTO ohlcv_daily
+                (project_id, candle_date, open, high, low, close, volume,
+                 quote_volume, trades, source)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(project_id, candle_date) DO UPDATE SET
+                open = excluded.open,
+                high = excluded.high,
+                low = excluded.low,
+                close = excluded.close,
+                volume = excluded.volume,
+                quote_volume = excluded.quote_volume,
+                trades = excluded.trades,
+                source = excluded.source
+            """,
+            (
+                project_id,
+                candle_date,
+                c["open"],
+                c["high"],
+                c["low"],
+                c["close"],
+                c["volume"],
+                c.get("quote_volume"),
+                c.get("trades"),
+                source,
+            ),
+        )
+        n += 1
+    return n

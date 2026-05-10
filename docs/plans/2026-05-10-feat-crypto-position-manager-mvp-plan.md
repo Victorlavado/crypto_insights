@@ -14,10 +14,17 @@ related_adrs:
   - docs/decisions/0006-state-machine-transitions.md
 completion_notes: |
   Fase 0 (Foundations), Fase 1 (Layer 2 viability), Fase 3 (Fusion + Dashboard)
-  completas. Fase 2 (Layer 1 signals) parcial — indicators + consolidation breakout
-  + Hyperliquid funding + derived signals computation hechos. Smart money pipeline
-  (Helius/Alchemy + 5-step EOA filtering) DEFERRED para sesión follow-up.
-  4 commits, 43 tests, lint clean, agent-native parity verificada.
+  completas. Fase 2 (Layer 1 signals) COMPLETA en sesión follow-up:
+  - indicators + consolidation breakout + Hyperliquid funding + derived pipeline (1576cd8)
+  - migration 0002 (ohlcv_daily + holders_snapshots), Helius connector (Solana DAS),
+    Moralis connector (EVM ERC20), excluded_addresses.yaml seed (CEX/DEX/bridges
+    Ethereum/Base/Arbitrum/Solana), smart_money signal con pipeline 5 pasos
+    (tagging + heuristic filter + concentration + delta vs prior 7d ± margen),
+    backfill-ohlcv CLI command paginado e idempotente.
+  Open Q1 resuelta in-line: Moralis sobre Alchemy (endpoint nativo ERC20 owners
+  by balance). Smart money requiere keys reales (CI_HELIUS_API_KEY, CI_MORALIS_API_KEY)
+  para alimentar el signal; sin keys, queda como gap aislado (batch sigue corriendo).
+  5 commits, 63 tests, lint clean, agent-native parity verificada.
 ---
 
 # Crypto Position Manager MVP — implementación
@@ -794,20 +801,21 @@ def test_dashboard_uses_cli_json_only():
 
 **Estimación real**: ~4-6h en sesión asistida.
 
-#### Fase 2 — Layer 1 core (semanas 3-4) 🟡 PARCIAL (2026-05-10)
+#### Fase 2 — Layer 1 core (semanas 3-4) ✅ COMPLETADA (2026-05-10)
 
 **Objetivo**: signals de positioning principales operativos.
 
-- [ ] Migración esquema para guardar OHLCV histórico completo (Binance da hasta 2017+, almacenar todo lo disponible). **Pendiente**: el connector trae 400d que es suficiente para indicadores live, pero backfill histórico completo queda para sesión follow-up.
-- [ ] Backfill OHLCV diario completo histórico (script one-shot). **Pendiente**.
+- [x] Migración esquema para guardar OHLCV histórico completo (migration 0002 `ohlcv_daily` + `holders_snapshots`).
+- [x] Backfill OHLCV diario script (CLI `crypto-insights backfill-ohlcv` paginado 1000/req, idempotente).
 - [x] `signals/indicators.py`: ATR Wilder, Bollinger Width, RVOL, range compression, CMF, RSI — con tests (13 verdes, incluye hypothesis property test para ATR).
 - [x] `signals/consolidation_breakout.py`: detector con los 4 criterios + filtro RSI<50 + BBW bottom decile + CMF>0 + look-ahead protection (`df_weekly_closed`).
 - [x] Connector `hyperliquid` (funding/OI/mark via `metaAndAssetCtxs` + funding history 30d).
-- [ ] Connector `helius` (Solana top holders) — **DEFERRED** (full smart money pipeline = ~3-4h adicional con filtering EOA en 5 pasos).
-- [ ] **Open Q1** ETH top holders (Alchemy/Moralis) — **DEFERRED** mismo motivo.
+- [x] Connector `helius` (Solana top holders via DAS `getTokenAccounts` — owner ya resuelto, no requiere paso ATA→owner separado).
+- [x] **Open Q1 resuelta**: Moralis sobre Alchemy. Justificación: Alchemy no tiene endpoint nativo ERC20 top holders ranked by balance (habría que agregar desde getTokenTransfers); Moralis `/erc20/{token}/owners` lo expone directamente con `is_contract` flag. Si emerge necesidad de redundancia en Fase 4, añadir alchemy como fallback.
 - [x] `signals/funding.py`: z-score 30d con MIN_HISTORY_FOR_ZSCORE=14.
-- [ ] `signals/smart_money.py` — **DEFERRED**.
-- [x] `pipeline/derived.py`: compute_derived_for_project orquesta ATR % daily + consolidation_breakout weekly + funding z-score; persiste en `derived_signals` con formula_version.
+- [x] `signals/smart_money.py`: pipeline 5 pasos (load_excluded_addresses → filter_holders con tagging+contract+concentration → persist_holders_snapshot → find_prior_snapshot_date → compute_smart_money_delta). 9 tests verdes incluyendo end-to-end con DB temporal.
+- [x] `data/labels/excluded_addresses.yaml`: seed curado de CEX hot wallets (Binance, Coinbase, OKX, Kraken, Crypto.com), DEX programs (Uniswap, Raydium, Orca, Jupiter, Kamino, 1inch), bridges (Wormhole, Arbitrum, Across) — Ethereum/Base/Arbitrum/Solana.
+- [x] `pipeline/derived.py`: compute_derived_for_project orquesta ATR % daily + consolidation_breakout weekly + funding z-score + smart_money_delta_7d (cuando helius/moralis snapshot disponible); persiste en `derived_signals` con formula_version.
 - [x] Pipeline integra derived + Layer 2 en transacción per-project (R-crítico #8).
 
 **Resultados de validación (2026-05-10)**:
@@ -818,12 +826,12 @@ def test_dashboard_uses_cli_json_only():
 - Consolidation breakout = 0.0 para todos en live data (los 4 criterios + RSI filter + BBW bottom decile son estrictos por diseño — confirmado correcto).
 - HYPE/STRK siguen blocked por Layer 2.
 
-**Pendiente para Fase 2 completa (sesión follow-up)**:
-- Smart money pipeline completo (Helius DAS / Alchemy + filtering EOA en 5 pasos).
-- Backfill OHLCV histórico para enable backtest visual de breakouts retrospectivos.
-- Validación visual de breakout sobre HYPE 2024-2025 (requiere backfill).
+**Pendiente para Fase 4 (validación con datos reales)**:
+- Smart money: requiere keys CI_HELIUS_API_KEY + CI_MORALIS_API_KEY configuradas; pipeline implementado y testeado contra fixtures (mock-first), live validation queda al usuario.
+- Backfill OHLCV histórico: CLI implementado e idempotente; ejecutar `crypto-insights backfill-ohlcv --start 2023-01-01` para alimentar backtest visual.
+- Validación visual de breakout sobre HYPE 2024-2025: scope de Fase 4.
 
-**Estimación real (parcial)**: ~3-4h. Smart money pipeline restante: ~3-4h adicional.
+**Estimación real (cierre Fase 2 sesión follow-up 2026-05-10)**: ~3h adicionales — migration 0002, helius+moralis connectors con tests respx, excluded_addresses.yaml seed, signals/smart_money.py con 9 tests, integración derived+batch, CLI backfill-ohlcv con tests.
 
 #### Fase 3 — Fusión + Dashboard (semana 5) ✅ COMPLETADA (2026-05-10)
 

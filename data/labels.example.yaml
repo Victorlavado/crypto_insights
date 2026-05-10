@@ -1,0 +1,145 @@
+# excluded_addresses.yaml — direcciones que NO cuentan como "smart money EOA".
+#
+# Estructura:
+#   <chain>:
+#     <category>:
+#       - address: <hex|base58>
+#         name: <human-readable>
+#         source: <where we got this — github repo / dune / manual>
+#
+# Categorías estándar:
+#   cex       — Centralized exchange hot/cold wallets
+#   dex       — DEX programs / liquidity pools / routers
+#   bridge    — Cross-chain bridges
+#   vesting   — Vesting / team / treasury contracts
+#   protocol  — Protocol-owned contracts (pools, staking)
+#
+# Seed data: subset curado a mano de los repos públicos
+# (brianleect/etherscan-labels, dawsbot/eth-labels, tradezon/cex-list, Dune labels.addresses).
+# Refrescar periódicamente via script (futuro). Override manual en excluded_addresses_manual.yaml.
+
+ethereum:
+  cex:
+    - address: "0x28C6c06298d514Db089934071355E5743bf21d60"
+      name: "Binance 14"
+      source: tradezon/cex-list
+    - address: "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549"
+      name: "Binance 15"
+      source: tradezon/cex-list
+    - address: "0xDFd5293D8e347dFe59E90eFd55b2956a1343963d"
+      name: "Binance 16"
+      source: tradezon/cex-list
+    - address: "0x71660c4005BA85c37ccec55d0C4493E66Fe775d3"
+      name: "Coinbase 1"
+      source: tradezon/cex-list
+    - address: "0x503828976D22510aad0201ac7EC88293211D23Da"
+      name: "Coinbase 2"
+      source: tradezon/cex-list
+    - address: "0xddfAbCdc4D8FfC6d5beaf154f18B778f892A0740"
+      name: "Coinbase 3"
+      source: tradezon/cex-list
+    - address: "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"
+      name: "Binance 7 (cold)"
+      source: tradezon/cex-list
+    - address: "0x6262998Ced04146fA42253a5C0AF90CA02dfd2A3"
+      name: "Crypto.com 2"
+      source: tradezon/cex-list
+    - address: "0x46340b20830761efd32832A74d7169B29FEB9758"
+      name: "Crypto.com 1"
+      source: tradezon/cex-list
+    - address: "0x77696bb39917C91A0c3908D577d5e322095425cA"
+      name: "OKX"
+      source: tradezon/cex-list
+    - address: "0xA7EFAe728D2936e78BDA97dc267687568dD593f3"
+      name: "OKX 2"
+      source: tradezon/cex-list
+    - address: "0x2FAF487A4414Fe77e2327F0bf4AE2a264a776AD2"
+      name: "FTX (cold)"
+      source: tradezon/cex-list
+    - address: "0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8"
+      name: "Binance 8 (cold)"
+      source: tradezon/cex-list
+    - address: "0x267be1C1D684F78cb4F6a176C4911b741E4Ffdc0"
+      name: "Kraken"
+      source: tradezon/cex-list
+    - address: "0xfA52274DD61E1643d2205169732f29114BC240b3"
+      name: "Bybit (hot)"
+      source: tradezon/cex-list
+  dex:
+    - address: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
+      name: "Uniswap V2 Router"
+      source: brianleect/etherscan-labels
+    - address: "0xE592427A0AEce92De3Edee1F18E0157C05861564"
+      name: "Uniswap V3 Router"
+      source: brianleect/etherscan-labels
+    - address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
+      name: "0x Exchange Proxy"
+      source: brianleect/etherscan-labels
+    - address: "0x1111111254EEB25477B68fb85Ed929f73A960582"
+      name: "1inch V5 Router"
+      source: brianleect/etherscan-labels
+  bridge:
+    - address: "0x3ee18B2214AFF97000D974cf647E54347dD75Fe0"
+      name: "Wormhole Token Bridge"
+      source: brianleect/etherscan-labels
+    - address: "0x4DBd4fc535Ac27206064B68FfCf827b0A60BAB3f"
+      name: "Arbitrum One Bridge"
+      source: brianleect/etherscan-labels
+
+base:
+  cex:
+    - address: "0xF977814e90dA44bFA03b6295A0616a897441aceC"
+      name: "Binance (Base)"
+      source: tradezon/cex-list
+  dex:
+    - address: "0x6Aa397cAB00a2A40025DbF839a83f16d5ec7c1eB"
+      name: "Aerodrome Router"
+      source: manual
+
+arbitrum:
+  cex:
+    - address: "0xB38e8c17e38363aF6EbdCb3dAE12e0243582891D"
+      name: "Binance (Arbitrum)"
+      source: tradezon/cex-list
+  dex:
+    - address: "0xC36442b4a4522E871399CD717aBDD847Ab11FE88"
+      name: "Uniswap V3 NFT Manager (Arb)"
+      source: manual
+
+solana:
+  cex:
+    - address: "5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9"
+      name: "Binance Hot (Sol)"
+      source: tradezon/cex-list
+    - address: "AobVSwdW9BbpMdJvTqeCN4hPAmh4rHm7vwLnQ5ATSyrS"
+      name: "Coinbase 1 (Sol)"
+      source: tradezon/cex-list
+    - address: "H8sMJSCQxfKiFTCfDR3DUMLPwcRbM61LGFJ8N4dK3WjS"
+      name: "Coinbase 2 (Sol)"
+      source: tradezon/cex-list
+    - address: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+      name: "Crypto.com (Sol)"
+      source: tradezon/cex-list
+    - address: "GJRs4FwHtemZ5ZE9x3FNvJ8TMwitKTh21yxdRPqn7npE"
+      name: "OKX (Sol)"
+      source: tradezon/cex-list
+    - address: "u6PJ8DtQuPFnfmwHbGFULQ4u4EgjDiyYKjVEsynXq2w"
+      name: "Gate.io (Sol)"
+      source: tradezon/cex-list
+  dex:
+    - address: "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+      name: "Raydium AMM V4"
+      source: helius-labels
+    - address: "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP"
+      name: "Orca Whirlpool Program"
+      source: helius-labels
+    - address: "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+      name: "Jupiter Aggregator V6"
+      source: helius-labels
+    - address: "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD"
+      name: "Kamino Lend"
+      source: helius-labels
+  bridge:
+    - address: "wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb"
+      name: "Wormhole Bridge (Sol)"
+      source: helius-labels

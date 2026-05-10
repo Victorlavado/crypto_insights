@@ -1,0 +1,46 @@
+{
+  "jsonrpc": "2.0",
+  "id": "crypto-insights",
+  "result": {
+    "total": 5,
+    "limit": 100,
+    "page": 1,
+    "token_accounts": [
+      {
+        "address": "AAA0000000000000000000000000000000000000001",
+        "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+        "owner": "WhaleEOA111111111111111111111111111111111111",
+        "amount": "500000000000000",
+        "frozen": false
+      },
+      {
+        "address": "AAA0000000000000000000000000000000000000002",
+        "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+        "owner": "RaydiumPool2222222222222222222222222222222222",
+        "amount": "300000000000000",
+        "frozen": false
+      },
+      {
+        "address": "AAA0000000000000000000000000000000000000003",
+        "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+        "owner": "WhaleEOA111111111111111111111111111111111111",
+        "amount": "100000000000000",
+        "frozen": false
+      },
+      {
+        "address": "AAA0000000000000000000000000000000000000004",
+        "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+        "owner": "SecondEOA22222222222222222222222222222222222",
+        "amount": "50000000000000",
+        "frozen": false
+      },
+      {
+        "address": "AAA0000000000000000000000000000000000000005",
+        "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+        "owner": "BinanceHotWallet5333333333333333333333333333",
+        "amount": "10000000000000",
+        "frozen": false
+      }
+    ]
+  }
+}

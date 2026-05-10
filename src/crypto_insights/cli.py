@@ -353,6 +353,56 @@ def viability(
     typer.echo(f"Viability report written to {output_path}")
 
 
+@app.command(name="backfill-ohlcv")
+def cmd_backfill_ohlcv(
+    symbol: Annotated[
+        str | None,
+        typer.Option("--symbol", help="Solo este símbolo. Default: todos los proyectos eligibles"),
+    ] = None,
+    start_date: Annotated[
+        str | None, typer.Option("--start", help="Fecha inicio (YYYY-MM-DD). Default: 2023-01-01")
+    ] = None,
+    end_date: Annotated[
+        str | None, typer.Option("--end", help="Fecha fin (YYYY-MM-DD). Default: hoy UTC")
+    ] = None,
+    *,
+    json_out: Annotated[bool, typer.Option("--json", help="Output as JSON")] = False,
+) -> None:
+    """Backfill OHLCV diario desde Binance al table ohlcv_daily.
+
+    Idempotente. Paginación de 1000 candles/request. Ejecutar manualmente cuando
+    añades un proyecto nuevo o necesitas extender histórico para backtest.
+    """
+    from datetime import date as _date
+
+    from .pipeline.backfill import backfill_all_binance_projects
+
+    start = _date.fromisoformat(start_date) if start_date else _date(2023, 1, 1)
+    end = _date.fromisoformat(end_date) if end_date else _date.today()
+
+    with db_mod.connection() as conn:
+        projects = list_projects(conn)
+        if symbol:
+            projects = [p for p in projects if p.symbol == symbol]
+            if not projects:
+                typer.echo(f"Unknown symbol: {symbol!r}", err=True)
+                raise typer.Exit(2)
+        result = asyncio.run(
+            backfill_all_binance_projects(conn, projects, start_date=start, end_date=end)
+        )
+
+    _print(
+        {
+            "action": "backfill-ohlcv",
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "candles_per_project": result,
+            "total_candles": sum(result.values()),
+        },
+        as_json=json_out,
+    )
+
+
 @app.command()
 def tools(
     *,

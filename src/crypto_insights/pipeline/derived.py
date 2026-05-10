@@ -28,6 +28,7 @@ from ..signals.indicators import (
     candles_to_dataframe,
     resample_to_weekly,
 )
+from ..signals.smart_money import load_excluded_addresses, run_smart_money_pipeline
 from .persist import upsert_derived_signal
 
 log = get_logger(__name__)
@@ -137,6 +138,35 @@ def compute_derived_for_project(
                 formula_version="v1",
             )
         )
+
+    # Smart money — pipeline 5 pasos sobre helius (Solana) o moralis (EVM).
+    # Persiste holders_snapshots y computa delta vs prior 7d aprox.
+    excluded = load_excluded_addresses()
+    for source_name in ("helius", "moralis"):
+        sm_payload = _latest_payload(conn, project.id, source_name)
+        if not sm_payload or "holders" not in sm_payload:
+            continue
+        delta_pct = run_smart_money_pipeline(
+            conn,
+            project,
+            batch_id=signal_date.isoformat(),
+            snapshot_date=signal_date,
+            holders_payload=sm_payload["holders"],
+            source=source_name,
+            excluded=excluded,
+        )
+        out.append(
+            DerivedSignal(
+                project_id=project.id,
+                signal_date=signal_date,
+                signal_name="smart_money_delta_7d",
+                value=delta_pct,
+                formula_version="v1",
+            )
+        )
+        # Stop after first source that returned a snapshot — un proyecto solo
+        # vive en una chain, no debería emitir signal duplicado.
+        break
 
     return out
 

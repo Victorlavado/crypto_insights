@@ -22,7 +22,9 @@ from ..connectors import (
     BinanceConnector,
     DeFiLlamaConnector,
     GitHubConnector,
+    HeliusConnector,
     HyperliquidConnector,
+    MoralisConnector,
 )
 from ..connectors.base import ConnectorError, build_http_client
 from ..logging_config import get_logger
@@ -90,15 +92,21 @@ async def _heartbeat_loop(batch_id: str, interval_seconds: int) -> None:
 def _build_connectors(client: httpx.AsyncClient) -> Sequence[_ConnectorLike]:
     """Construye conectores con el client compartido.
 
-    Fase 0: Binance. Fase 1: + DeFiLlama, GitHub.
-    Cada fase futura añade aquí. Pasarse a registry pattern cuando lleguen
-    a >5 (no antes — premature abstraction).
+    Fase 0: Binance. Fase 1: + DeFiLlama, GitHub. Fase 2: + Hyperliquid,
+    Helius, Moralis. Helius/Moralis solo activos si la API key está
+    configurada — sin ella, supports_project sigue True pero el fetch
+    falla limpio con ConnectorError y queda como gap.
     """
+    from ..config import get_settings
+
+    settings = get_settings()
     return [
         BinanceConnector(client),
         DeFiLlamaConnector(client),
         GitHubConnector(client),
         HyperliquidConnector(client),
+        HeliusConnector(client, settings.helius_api_key),
+        MoralisConnector(client, settings.moralis_api_key),
     ]
 
 
