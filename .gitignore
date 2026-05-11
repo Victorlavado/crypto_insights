@@ -73,6 +73,8 @@ data/watchlist.yaml
 data/events.yaml
 data/excluded_addresses.yaml
 data/excluded_addresses_manual.yaml
+data/validation/
+data/viability_report.md
 
 # Secrets
 .env

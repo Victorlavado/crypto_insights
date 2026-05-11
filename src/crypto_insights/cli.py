@@ -403,6 +403,97 @@ def cmd_backfill_ohlcv(
     )
 
 
+@app.command(name="validate-breakout")
+def cmd_validate_breakout(
+    symbol: str,
+    start_date: Annotated[
+        str | None,
+        typer.Option(
+            "--start", help="Fecha inicio del rango a reportar (YYYY-MM-DD). Default: inicio OHLCV"
+        ),
+    ] = None,
+    end_date: Annotated[
+        str | None,
+        typer.Option("--end", help="Fecha fin del rango a reportar (YYYY-MM-DD). Default: hoy UTC"),
+    ] = None,
+    output: Annotated[
+        str | None,
+        typer.Option(
+            "--output",
+            "-o",
+            help="Markdown output path. Default: data/validation/<symbol>-breakout.md",
+        ),
+    ] = None,
+    *,
+    json_out: Annotated[
+        bool, typer.Option("--json", help="Output JSON to stdout instead of writing MD")
+    ] = False,
+) -> None:
+    """Validación retrospectiva del detector consolidation_breakout sobre histórico.
+
+    Lee ohlcv_daily (requiere haber corrido `backfill-ohlcv` primero) y aplica
+    el detector semana cerrada por semana cerrada con look-ahead protection.
+    Útil para validar visualmente que el detector marca breakouts conocidos
+    (e.g., SOL Q4 2023 → 2024, ZEC nov-2025) sin tomar decisiones de trading.
+
+    Salida: tabla markdown con highlights (score > 0) + timeline completo.
+    """
+    from datetime import date as _date
+
+    from .pipeline.validate import render_markdown_report, validate_breakout_history
+
+    start = _date.fromisoformat(start_date) if start_date else None
+    end = _date.fromisoformat(end_date) if end_date else _date.today()
+
+    with db_mod.connection() as conn:
+        proj = conn.execute(
+            "SELECT id, archetype FROM projects WHERE symbol = ?", (symbol,)
+        ).fetchone()
+        if not proj:
+            typer.echo(f"Unknown symbol: {symbol!r}", err=True)
+            raise typer.Exit(2)
+
+        observations = validate_breakout_history(conn, proj["id"], start_date=start, end_date=end)
+
+    if json_out:
+        _print(
+            [
+                {
+                    "week_start": o.week_start.isoformat(),
+                    "week_end": o.week_end.isoformat(),
+                    "score": o.score,
+                    "compression_active": o.compression_active,
+                    "breakout_triggered": o.breakout_triggered,
+                    "range_pct": o.range_pct,
+                    "atr_ratio": o.atr_ratio,
+                    "volume_ratio": o.volume_ratio,
+                    "breakout_rvol": o.breakout_rvol,
+                    "rsi": o.rsi_during_compression,
+                    "bbw": o.bbw_value,
+                    "cmf": o.cmf_value,
+                    "close": o.close,
+                    "reason": o.reason,
+                }
+                for o in observations
+            ],
+            as_json=True,
+        )
+        return
+
+    settings = get_settings()
+    if output is None:
+        output_path = settings.data_dir / "validation" / f"{symbol}-breakout.md"
+    else:
+        output_path = settings.project_root / output
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    report = render_markdown_report(symbol, observations, archetype=proj["archetype"])
+    output_path.write_text(report, encoding="utf-8")
+    typer.echo(f"Validation report written to {output_path}")
+    typer.echo(f"Semanas evaluadas: {len(observations)}")
+    typer.echo(f"Semanas score > 0: {sum(1 for o in observations if o.score > 0)}")
+    typer.echo(f"Breakouts confirmados: {sum(1 for o in observations if o.breakout_triggered)}")
+
+
 @app.command()
 def tools(
     *,
