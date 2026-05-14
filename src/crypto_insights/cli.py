@@ -365,17 +365,36 @@ def cmd_backfill_ohlcv(
     end_date: Annotated[
         str | None, typer.Option("--end", help="Fecha fin (YYYY-MM-DD). Default: hoy UTC")
     ] = None,
+    source: Annotated[
+        str,
+        typer.Option(
+            "--source",
+            help="OHLCV source: 'binance' (Spot, default) o 'hyperliquid' (perps — HYPE/FARTCOIN/PUMP)",
+        ),
+    ] = "binance",
     *,
     json_out: Annotated[bool, typer.Option("--json", help="Output as JSON")] = False,
 ) -> None:
-    """Backfill OHLCV diario desde Binance al table ohlcv_daily.
+    """Backfill OHLCV diario al table ohlcv_daily.
 
-    Idempotente. Paginación de 1000 candles/request. Ejecutar manualmente cuando
-    añades un proyecto nuevo o necesitas extender histórico para backtest.
+    Idempotente. Paginación 1000 candles/request. Ejecutar manualmente cuando
+    añades un proyecto nuevo o necesitas extender histórico para backtest visual.
+
+    `--source binance`: Spot OHLCV. Cubre BTC, ETH, AAVE, SUI, ZEC, PENDLE, etc.
+    `--source hyperliquid`: perps OHLCV. Única fuente pública para HYPE, FARTCOIN,
+                            PUMP y proyectos Solana-only que no están en Binance Spot.
     """
     from datetime import date as _date
 
-    from .pipeline.backfill import backfill_all_binance_projects
+    from .pipeline.backfill import (
+        backfill_all_binance_projects,
+        backfill_all_hyperliquid_projects,
+    )
+
+    source = source.lower().strip()
+    if source not in {"binance", "hyperliquid"}:
+        typer.echo(f"Invalid --source: {source!r}. Use 'binance' or 'hyperliquid'.", err=True)
+        raise typer.Exit(2)
 
     start = _date.fromisoformat(start_date) if start_date else _date(2023, 1, 1)
     end = _date.fromisoformat(end_date) if end_date else _date.today()
@@ -387,13 +406,19 @@ def cmd_backfill_ohlcv(
             if not projects:
                 typer.echo(f"Unknown symbol: {symbol!r}", err=True)
                 raise typer.Exit(2)
-        result = asyncio.run(
-            backfill_all_binance_projects(conn, projects, start_date=start, end_date=end)
-        )
+        if source == "binance":
+            result = asyncio.run(
+                backfill_all_binance_projects(conn, projects, start_date=start, end_date=end)
+            )
+        else:
+            result = asyncio.run(
+                backfill_all_hyperliquid_projects(conn, projects, start_date=start, end_date=end)
+            )
 
     _print(
         {
             "action": "backfill-ohlcv",
+            "source": source,
             "start": start.isoformat(),
             "end": end.isoformat(),
             "candles_per_project": result,

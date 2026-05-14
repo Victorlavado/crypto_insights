@@ -45,8 +45,33 @@ NO aplicado todavía — esperar feedback del usuario antes de tocar ADR 0004. E
 
 ---
 
+## consolidation_breakout — HYPE no es evaluable por el detector
+
+**Fecha**: 2026-05-14
+**Backfill ejecutado**: HYPE OHLCV via Hyperliquid `candleSnapshot` desde TGE
+**Output**: `data/validation/HYPE-breakout.md` (vacío por diseño)
+
+**Hallazgo**: HYPE TGE = 29-nov-2024. A diciembre-2025 acumula 392 candles diarios = **55 weeks válidas** (valid_days ≥ 5). El detector requiere `MIN_BARS_REQUIRED = 56` (50w baseline ATR + 6w window compresión). Resultado: 0 semanas evaluables.
+
+**Implicaciones**:
+1. La validación visual de "HYPE Q3-2025" que pedía el plan original era estructuralmente imposible — el detector requiere baseline histórico que HYPE no tenía durante 2025.
+2. Layer 2 ya cubre este caso: regla `LISTING_RECENT < 6m → amber automático` (ADR 0001). HYPE tampoco aplicaría aunque hubiera baseline, porque el archetype `post-tge` tiene `consolidation_applies=False`.
+3. Para tokens post-TGE el indicador útil es el delta de holders / smart money / funding z-score, no breakouts técnicos.
+
+**Acción**: ninguna sobre el detector (su strictness aquí es correcta por diseño). Si quisiéramos evaluar HYPE específicamente, habría que esperar a Q3-2026 (TGE + 24m → 100w para BBW decile robusto + 56w mínimo).
+
+---
+
+## FARTCOIN — fuera del scope del detector
+
+**Fecha**: 2026-05-14
+**Archetype**: memecoin-brand → `consolidation_applies = False` (ADR 0001).
+
+**Razón**: memecoins no responden a compresión técnica como infra/L1. Mindshare y funding z-score son los signals primarios. Confirmado por diseño del modelo (peso `consolidation_breakout = 0.0` en columna memecoin-brand de archetype_rules).
+
+---
+
 ## Validaciones pendientes
 
-- HYPE 2024-Q3 (requiere fuente OHLCV alternativa — ver arriba).
-- FARTCOIN 2024-2025 (Solana, no en Binance Spot — necesita Bybit o DEX OHLC).
 - Smart money signal: pendiente validación con keys reales `CI_HELIUS_API_KEY` + `CI_MORALIS_API_KEY`.
+- Re-evaluar ZEC/SUI/AAVE con thresholds calibrados crypto (range 30%, atr 0.85, vol 0.7, BBW decile 0.2) cuando se decida aprobar la actualización de ADR 0004.

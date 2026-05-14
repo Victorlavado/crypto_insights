@@ -855,13 +855,20 @@ def test_dashboard_uses_cli_json_only():
 
 **Objetivo**: cerrar el loop de evolución descrito en `docs/feedback/README.md`.
 
-- [ ] **Re-cómputo histórico**: aplicar reglas actuales sobre histórico 2024-2025 para validar visualmente que detectarían los moves conocidos (HYPE Q3 2025, ZEC nov-2025, FARTCOIN parabólica).
+- [x] **Re-cómputo histórico** (parcial — ver `docs/learnings/signal-performance.md`):
+    - CLI `crypto-insights validate-breakout SYMBOL --start --end` implementado con look-ahead protection.
+    - CLI `crypto-insights backfill-ohlcv --source binance|hyperliquid` (Hyperliquid añadido 2026-05-14 para HYPE/FARTCOIN/PUMP).
+    - ZEC/SUI/AAVE 2024-2025 evaluados: 0 detecciones — thresholds ADR 0004 demasiado estrictos para crypto (compresión real 35-45%, no 15%).
+    - HYPE Q3-2025: estructuralmente no evaluable (TGE 29-nov-2024, solo 55w al cierre 2025; detector requiere ≥56w). Layer 2 `LISTING_RECENT` ya cubre ese caso por archetype `post-tge`.
+    - FARTCOIN: `consolidation_applies=False` para memecoin-brand por diseño. Detector no aplica.
 - [ ] Resolución de **Open Q2 (mindshare)** y **Open Q3 (netflows)** según lo aprendido en uso real.
 - [ ] Primer ciclo de review semanal sintetizando `feedback/` → `learnings/`.
-- [ ] Ajuste de pesos de `archetype_rules` basado en aciertos/errores documentados.
+- [ ] Ajuste de pesos de `archetype_rules` basado en aciertos/errores documentados (regla: requiere ≥3 casos repetidos en `feedback/`).
 - [ ] Considerar Opción 3 híbrida (LLM-reasoner) si reglas duras dejan dinero sobre la mesa de forma sistemática.
 
 **Success criteria**: al menos 4 entradas en `feedback/`, una en `learnings/signal-performance.md`, y un ADR 0002 si emergió un cambio estructural.
+
+**Progreso (2026-05-14)**: 1ª entrada empírica en `learnings/signal-performance.md` (thresholds + HYPE + FARTCOIN). Quedan: 4 entradas en `feedback/` (depende de uso real del usuario), validación smart money con keys reales (pendiente keys `CI_HELIUS_API_KEY`/`CI_MORALIS_API_KEY`).
 
 **Estimación**: ongoing.
 
