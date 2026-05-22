@@ -1,0 +1,52 @@
+{
+  "page": 1,
+  "page_size": 100,
+  "cursor": null,
+  "result": [
+    {
+      "token_address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "owner_address": "0xWhaleEOA00000000000000000000000000000001",
+      "balance": "5000000000000000000000",
+      "balance_formatted": "5000.0",
+      "usd_value": "1000000.0",
+      "is_contract": false,
+      "percentage_relative_to_total_supply": 5.0
+    },
+    {
+      "token_address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "owner_address": "0xAavePoolContract000000000000000000000000",
+      "balance": "3000000000000000000000",
+      "balance_formatted": "3000.0",
+      "usd_value": "600000.0",
+      "is_contract": true,
+      "percentage_relative_to_total_supply": 3.0
+    },
+    {
+      "token_address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "owner_address": "0xBinanceHotWallet001111111111111111111111",
+      "balance": "2500000000000000000000",
+      "balance_formatted": "2500.0",
+      "usd_value": "500000.0",
+      "is_contract": false,
+      "percentage_relative_to_total_supply": 2.5
+    },
+    {
+      "token_address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "owner_address": "0xSecondEOA00000000000000000000000000000002",
+      "balance": "800000000000000000000",
+      "balance_formatted": "800.0",
+      "usd_value": "160000.0",
+      "is_contract": false,
+      "percentage_relative_to_total_supply": 0.8
+    },
+    {
+      "token_address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+      "owner_address": "0xThirdEOA00000000000000000000000000000003",
+      "balance": "200000000000000000000",
+      "balance_formatted": "200.0",
+      "usd_value": "40000.0",
+      "is_contract": false,
+      "percentage_relative_to_total_supply": 0.2
+    }
+  ]
+}

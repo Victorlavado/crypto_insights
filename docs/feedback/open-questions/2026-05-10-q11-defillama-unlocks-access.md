@@ -3,57 +3,54 @@ question_id: Q11
 date: 2026-05-10
 plan: docs/plans/2026-05-10-feat-crypto-position-manager-mvp-plan.md
 blocking: Fase 1 (Layer 2 hard constraint de unlocks)
-status: open (acción: verificar empíricamente en Fase 1)
+status: RESOLVED (2026-05-10) — DefiLlama Pro confirmado, MVP arranca con manual events YAML
 discovered_in: deepen-plan (research conflicto)
+resolved_in: docs/plans/2026-05-10-feat-crypto-position-manager-mvp-plan.md (Fase 1)
 ---
 
 # Q11 — DeFiLlama Unlocks: free vs Pro-only
 
 ## Contexto
 
-Durante el `/deepen-plan`, dos research agents independientes dieron respuestas contradictorias sobre el endpoint `/emissions` de DeFiLlama:
+Durante el `/deepen-plan`, dos research agents independientes dieron respuestas contradictorias sobre el endpoint `/emissions` de DeFiLlama. El plan original asumió free.
 
-- **Research APIs general**: "Sin API key. Free tier real, sin límite documentado para uso normal. El endpoint de unlocks (`/emissions`) está en el free tier público."
-- **Research específico de unlocks**: "DeFiLlama aloja `/api/emissions` como endpoint Pro-only. No hay diferencia entre singular `/emission/{protocol}` y plural; ambos requieren suscripción Pro."
-
-El plan original asumió free.
-
-## Acción inmediata (no esperar respuesta humana)
-
-Verificar empíricamente en setup de Fase 1, primer paso del connector. Comando:
+## Verificación empírica (2026-05-10)
 
 ```bash
-curl -s -w "\n%{http_code}\n" "https://api.llama.fi/emissions" | head -50
+$ curl -sS -w "HTTP %{http_code}\n" "https://api.llama.fi/emissions" --max-time 30
+HTTP 402
+Upgrade to the paid API plan at https://defillama.com/subscription
 ```
 
-Posibles resultados:
-- **HTTP 200 + JSON con datos**: free, plan original procede.
-- **HTTP 401/403 / `{"error":"upgrade required"}`**: Pro-only, activar fallback.
-- **Otro endpoint distinto**: investigar exact path (`/api/emissions`, `/protocols/{slug}/emissions`, etc).
+**Resultado: Pro-only confirmado** (HTTP 402 Payment Required).
 
-## Plan de fallback
+Tokenomist.ai también explorado brevemente: `/api/projects` devuelve 404 con HTML genérico (Next.js SPA, no public REST API trivialmente descubrible).
 
-### Plan B — scrape HTML público
-- URL: `https://defillama.com/unlocks/{protocol}`
-- Requiere parsing HTML (BeautifulSoup) + tolerancia a cambios de UI.
-- Frágil — DefiLlama re-rendea con Next.js (datos en `__NEXT_DATA__` JSON inline, scrapeable estable).
-- Coste: ~1 hora setup + risk de breakage.
+## Decisión (2026-05-10)
 
-### Plan C — Tokenomist.ai como primaria
-- URL: `https://tokenomist.ai/{protocol}`
-- Sin API formal pero schema documentado (categorías, fechas, magnitudes).
-- Igual que Plan B requiere scrape, pero documenta su schema.
-- Probable más estable que DefiLlama HTML scraping.
+Para el MVP, **manual events YAML** (`data/events.yaml`) como fuente primaria:
 
-### Plan D — DefiLlama Pro
-- $300/mes. **Descartado para MVP** salvo justificación fuerte.
+- Victor mantiene un YAML con los unlocks futuros de los 30 proyectos curados (~30-90 eventos para los próximos 12 meses).
+- Schema alineado a ADR 0003 (allocation_category + magnitude_pct) y a la tabla EVENTS.
+- Connector `events_manual` lee el YAML y hace UPSERT en `EVENTS` (dedupe por `(project, event_type, event_date, source='manual')`).
+- Coste: ~30-45 min para popular inicialmente. Mantenimiento: ~5 min/semana al añadir eventos descubiertos en uso.
 
-## Recomendación
+**Por qué esto antes de scraping**:
 
-1. Ejecutar verificación en primer commit de Fase 1.
-2. Si free → registrar resultado y cerrar este Q.
-3. Si Pro → activar Plan C (Tokenomist) como primaria + Plan B (DefiLlama scrape) como cross-check semanal.
+1. **Honestidad de datos**: Victor sabe qué unlocks le importan (top-5-by-magnitude por proyecto), no necesitamos todos los eventos del calendario.
+2. **Foundation deuda baja**: scrape de DefiLlama HTML es ToS-borderline + frágil ante Next.js re-renders. Scrape de Tokenomist es scrape de SPA con datos en `__NEXT_DATA__` — viable pero requiere headless browser o reverse-engineering del payload JSON inline. Trabajo de ~3-4h con riesgo de breakage en 1-3 meses.
+3. **MVP first, automation later**: si el feedback log muestra que Victor está perdiendo entradas por no haber añadido un unlock al YAML, ahí es cuando vale la pena automatizar.
 
-## Acción esperada de Victor
+## Plan de evolución (post-MVP)
 
-Aprobación implícita de la verificación + decisión de fallback (B vs C) si Pro-only.
+Si Fase 4 muestra que la maintenance del YAML es bottleneck:
+
+- **Plan B** (next): scrape de `defillama.com/unlocks` parseando `__NEXT_DATA__` JSON inline (Next.js público). Estable mientras Llama no cambie de SSG. Re-evaluar trimestralmente.
+- **Plan D** (si emerge revenue): $300/mes Pro API.
+
+## Acción inmediata para Fase 1
+
+- [x] Verificar empíricamente — DONE 2026-05-10.
+- [ ] Crear `data/events.example.yaml` con 3-5 ejemplos (HYPE, STRK, SUI) — Fase 1.
+- [ ] Connector `events_manual.py` que lee YAML y popula EVENTS — Fase 1.
+- [ ] Cerrar este Q.

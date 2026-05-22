@@ -64,13 +64,17 @@ data/crypto.db
 data/crypto.db-wal
 data/crypto.db-shm
 data/crypto.db-journal
+data/_smoke_test*.db*
 data/backups/
 data/cassettes/
 data/logs/
 data/labels/
 data/watchlist.yaml
+data/events.yaml
 data/excluded_addresses.yaml
 data/excluded_addresses_manual.yaml
+data/validation/
+data/viability_report.md
 
 # Secrets
 .env

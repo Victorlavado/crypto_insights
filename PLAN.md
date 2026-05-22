@@ -24,29 +24,41 @@ Brainstorm origen: [`docs/brainstorms/2026-05-09-crypto-tracker-brainstorm.md`](
 
 ## Roadmap
 
-### Fase 0 — Foundations (esta semana)
+### Fase 0 — Foundations ✅ COMPLETADA (2026-05-10)
 - [x] Definir watchlist v1 (30 proyectos con archetype tag) → `data/watchlist.yaml`
-- [ ] Setup repo Python: `pyproject.toml`, ruff, pytest, .gitignore
-- [ ] SQLite schema: `projects`, `signals_snapshots`, `events` (unlocks, listings)
+- [x] Setup repo Python: `pyproject.toml`, ruff, mypy, pytest, .gitignore
+- [x] SQLite schema completa: `projects`, `batches`, `raw_snapshots`, `derived_signals`, `project_state`, `project_state_history`, `events`
+- [x] CLI: `init-db`, `sync-watchlist`, `list`, `state`, `batch-status`, `batch-daily`, `backup`, `tools`
+- [x] Conector Binance OHLCV (15 proyectos válidos en Spot; resto en _NOT_ON_BINANCE_SPOT)
+- [x] Pipeline batch con TaskGroup + heartbeat + cleanup huérfanos + UPSERT COALESCE
+- [x] Tests: 16 verdes
 
-### Fase 1 — Layer 2 / Filtro de viabilidad
-- [ ] Conector DeFiLlama: fees, TVL, volumen por protocolo
-- [ ] Conector GitHub: commits últimos 30/90 días, contributors activos
-- [ ] Conector unlocks: scrape DeFiLlama Unlocks o Tokenomist
-- [ ] Output: `viability_report.md` con flag verde/ámbar/rojo por proyecto
+### Fase 1 — Layer 2 / Filtro de viabilidad ✅ COMPLETADA (2026-05-10)
+- [x] Conector DeFiLlama: TVL/category via /protocols (free)
+- [x] Conector GitHub: commits 30/90d, contributors (requiere PAT)
+- [x] Conector unlocks: **events_manual** YAML (Q11 resolved: DeFiLlama /emissions = Pro-only $300/mes)
+- [x] signals/unlocks.py + fusion/layer2.py con hard constraint 5% ponderado / 4-8w
+- [x] CLI `viability`: tabla densa + drill-down → `data/viability_report.md`
+- [x] HYPE/STRK blocked confirmados con events.yaml curado
 
-### Fase 2 — Layer 1 / Signals de positioning
-- [ ] OHLCV semanal (Binance API o CoinGecko) + cálculo consolidation breakout
-- [ ] Funding/OI: Hyperliquid API → fallback Binance
-- [ ] Smart money: scrape semanal Etherscan/Solscan top 50 holders + delta
-- [ ] CEX netflows como proxy complementario
-- [ ] Mindshare: Kaito scrape o free tier
+### Fase 2 — Layer 1 / Signals de positioning 🟡 PARCIAL (2026-05-10)
+- [x] Indicadores TA a mano: ATR Wilder, BB Width, RVOL, range compression, CMF, RSI Wilder (13 tests)
+- [x] Consolidation breakout detector: 4 criterios + RSI<50 filter + BBW bottom decile + CMF>0 + look-ahead protection
+- [x] Funding/OI: Hyperliquid `metaAndAssetCtxs` + fundingHistory 30d + z-score
+- [ ] **DEFERRED**: Smart money pipeline (Helius DAS / Alchemy + 5-step EOA filtering)
+- [ ] **DEFERRED**: CEX netflows (Open Q3 — recomendación: omitir MVP, evaluar Fase 4)
+- [ ] **DEFERRED**: Mindshare (Open Q2 — Kaito sin free, gap explícito)
+- [ ] **DEFERRED**: OHLCV histórico backfill completo (script one-shot)
 
-### Fase 3 — Fusión por archetype + Dashboard
-- [ ] Reglas por archetype con pesos hardcoded (Opción 1 del brainstorm)
-- [ ] Cálculo de estado por proyecto
-- [ ] CLI dashboard: tabla con `rich` o markdown report regenerado
-- [ ] Snapshot histórico para review semanal
+### Fase 3 — Fusión por archetype + Dashboard ✅ COMPLETADA (2026-05-10)
+- [x] `fusion/archetype_rules.py`: tabla pesos (6 archetypes × 8 signals = 1.0 cada columna) + normalize_signal con clipping a [-1,1]
+- [x] `fusion/layer1.py`: composite_score con renormalize sobre signals presentes + gap policy (ADR 0005: ≥30% missing → degraded)
+- [x] state_from_score con thresholds (>0.6 aceleración, >0.3 acumulación, etc) + reset detection desde colapso
+- [x] Pipeline integra Layer 1 después de Layer 2 (solo para non-blocked)
+- [x] Hysteresis counter batches_in_state se incrementa/resetea correctamente (ADR 0006)
+- [x] `streamlit_app.py`: dashboard con tabs por archetype + drill-down + crear feedback + cache TTL 1h con batch_id invalidador
+- [x] Agent-native parity verificada: streamlit_app.py NO tiene SQL inline (consume `dashboard.api`)
+- [x] CLI `viability` genera markdown report regenerable
 
 ### Fase 4 — Iteración con feedback
 - [ ] Primer ciclo de review semanal con `docs/feedback/` activo
